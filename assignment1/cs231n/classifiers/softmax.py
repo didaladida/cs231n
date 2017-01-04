@@ -22,16 +22,31 @@ def softmax_loss_naive(W, X, y, reg):
   # Initialize the loss and gradient to zero.
   loss = 0.0
   dW = np.zeros_like(W)
-
+  num_classes = W.shape[1]
+  num_train = X.shape[0]
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using explicit loops.     #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
-  # here, it is easy to run into numeric instability. Don't forget the        #
-  # regularization!                                                           #
+  # here, it is easy to run into numeric instability. Don't forget the       #
+  # regularization!                                         #
   #############################################################################
-  pass
+  for i in xrange(num_train):
+    scores = X[i].dot(W)
+    exp_scores = np.exp(scores)
+    probs = exp_scores/np.sum(exp_scores)
+    loss += -np.log(probs[y[i]])
+    for j in xrange(num_classes):
+        if j!=y[i]:
+            dW[:,j] += probs[j]*X[i].T
+        else:
+            dW[:,j] += (probs[j]-1)*X[i].T
+
+  loss /= num_train
+  loss += 0.5 * reg * np.sum(W*W)
+  dW /= num_train
+  dW += reg*W
   #############################################################################
-  #                          END OF YOUR CODE                                 #
+  #             END OF YOUR CODE                           #
   #############################################################################
 
   return loss, dW
@@ -45,8 +60,19 @@ def softmax_loss_vectorized(W, X, y, reg):
   """
   # Initialize the loss and gradient to zero.
   loss = 0.0
+  num_train = X.shape[0]
   dW = np.zeros_like(W)
-
+  scores = X.dot(W)
+  # print scores.shape
+  exp_scores = np.exp(scores)
+  probs = exp_scores/np.sum(exp_scores,axis=1,keepdims=True)
+  loss = np.sum(-np.log(probs[range(num_train),y]))
+  probs[range(probs.shape[0]),y] -= 1
+  dW = X.T.dot(probs)
+  dW /= num_train
+  loss /= num_train
+  loss += 0.5 * reg * np.sum(W*W)
+  dW += reg*W
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
   # Store the loss in loss and the gradient in dW. If you are not careful     #

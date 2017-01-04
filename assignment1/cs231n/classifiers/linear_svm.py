@@ -40,12 +40,12 @@ def svm_loss_naive(W, X, y, reg):
   # Right now the loss is a sum over all training examples, but we want it
   # to be an average instead so we divide by num_train.
   loss /= num_train
-  dW /= num_train
   # Add regularization to the loss.
   loss += 0.5 * reg * np.sum(W * W)
-    
+  dW /= num_train
+  dW += reg*W
   #############################################################################
-  # TODO:                                                                     #
+  # TODO:                                                        #
   # Compute the gradient of the loss function and store it dW.                #
   # Rather that first computing the loss and then computing the derivative,   #
   # it may be simpler to compute the derivative at the same time that the     #
@@ -83,6 +83,7 @@ def svm_loss_vectorized(W, X, y, reg):
   scores[range(scores.shape[0]),y] = 0 - np.sum(scores,axis=1)
   dW += X.T.dot(scores)
   dW /= X.shape[0]
+  dW += reg*W
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
